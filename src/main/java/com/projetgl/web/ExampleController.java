@@ -13,9 +13,6 @@ public class ExampleController {
 
 	private String message = "example";
 
-	/**
-	 * Une simple page de test (GET)
-	 */
 	@RequestMapping(value = "/example")
 	private ModelAndView hello() {
 		return new ModelAndView("hello", "message", message);
