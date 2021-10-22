@@ -34,7 +34,10 @@ public class Product {
 	
 	@Basic
 	private String description;
-		
+	
+	@ManyToMany(mappedBy="products", fetch = FetchType.EAGER)
+	private List<Order> orders;
+	
 	public Product() {
 		
 	}
@@ -44,6 +47,7 @@ public class Product {
 		this.quantity = quantity;
 		this.price = price;
 		this.description = description;
+		this.orders = new ArrayList<>();
 	}
 
 	public Integer getId() {
@@ -86,5 +90,11 @@ public class Product {
 		this.description = description;
 	}
 
-	
+	public List<Order> getOrders() {
+		return orders;
+	}
+
+	public void setOrders(List<Order> orders) {
+		this.orders = orders;
+	}
 }

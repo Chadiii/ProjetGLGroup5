@@ -36,7 +36,10 @@ public class Client {
 	
 	@Basic
 	private String ccCCV;
-		
+	
+	@OneToOne(mappedBy = "client", fetch = FetchType.EAGER)
+	private Order order;
+	
 	public Client() {
 		
 	}
@@ -107,5 +110,12 @@ public class Client {
 		this.ccCCV = ccCCV;
 	}
 	
+	public Order getOrder() {
+		return order;
+	}
+
+	public void setOrder(Order order) {
+		this.order = order;
+	}
 	
 }
