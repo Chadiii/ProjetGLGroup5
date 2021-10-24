@@ -8,6 +8,15 @@
 			<button type="submit" class="btn btn-primary">Rechercher</button>
 		</div>
 	</form>
+	
+	<%if(request.getAttribute("errorMessage") != null){ %>
+		<div class="alert alert-danger alert-dismissible fade show" role="alert">
+			Vous ne pouvez pas supprimer cette commande elle est deja livrée !
+		  <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+		    <span aria-hidden="true">&times;</span>
+		  </button>
+		</div>
+	<% }else{ %>
 
 	<h1>Liste des commande</h1>
 
@@ -33,6 +42,7 @@
 			</tr>
 		</c:forEach>
 	</table>
+	<% } %>
 </div>
 
 <%@ include file="/WEB-INF/jsp/footer.jsp"%>
