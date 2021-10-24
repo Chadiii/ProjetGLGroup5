@@ -40,6 +40,12 @@ public class OrderController {
 
 	@Autowired
 	ClientRepository clientDAO;
+	
+	@GetMapping("/")
+	public ModelAndView main() {
+		return new ModelAndView("redirect:/products");
+		
+	}
 
 	@GetMapping("/products")
 	public ModelAndView getadmin(@RequestParam(required = false) String name) {
@@ -128,6 +134,19 @@ public class OrderController {
 			
 			session.invalidate();
 			return new ModelAndView("redirect:/order");
+		}
+	}
+	
+	@GetMapping("/order")
+	public ModelAndView getOrder(HttpSession session, @RequestParam(required = false) String mail) {
+		if(mail == null) {
+			String mailInSession = (String)session.getAttribute("mailInSession");
+			if(mailInSession != null)
+				return new ModelAndView("corders", "orders", orderDAO.findByClientMail(mailInSession));
+			return new ModelAndView("corders");
+		}else {
+			session.setAttribute("mailInSession", mail);
+			return new ModelAndView("corders", "orders", orderDAO.findByClientMail(mail));
 		}
 	}
 
