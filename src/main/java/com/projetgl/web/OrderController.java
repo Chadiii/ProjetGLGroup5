@@ -73,6 +73,45 @@ public class OrderController {
 		}
 	}
 
+	@GetMapping("/cart/delete/{id}")
+	public ModelAndView deleteFromCart(HttpSession session, @PathVariable Integer id) {
+		if(session.getAttribute("cart") == null) {
+			return new ModelAndView("redirect:/products");
+		}else {
+			Map<Product, Integer> productCart = (Map<Product, Integer>) session.getAttribute("cart");
+			removeFromCart(id, productCart);
+			if(productCart.size() == 0)
+				session.invalidate();
+			else
+				session.setAttribute("cart", productCart);
+			return new ModelAndView("redirect:/cart");
+		}
+	}
+
+	@GetMapping("/cart/cancel")
+	public ModelAndView cancelCart(HttpSession session) {
+		if(session.getAttribute("cart") == null) {
+			return new ModelAndView("redirect:/products");
+		}else {
+			session.invalidate();
+			return new ModelAndView("redirect:/cart");
+		}
+	}
+
+	@GetMapping("/cart/confirm")
+	public ModelAndView confirmCart(HttpSession session, RedirectAttributes redirectAttributes) {
+		if(session.getAttribute("cart") == null) {
+			return new ModelAndView("redirect:/products");
+		}else {
+			Product productWithLessQuantity = verifyStock((Map<Product, Integer>) session.getAttribute("cart"));
+			if(productWithLessQuantity != null){
+				redirectAttributes.addFlashAttribute("productWithLessQuantity", productWithLessQuantity);
+				return new ModelAndView("redirect:/cart");
+			}
+			return new ModelAndView("payment");
+		}
+	}
+
 	public void addToMap(Integer quantity, Integer id, Map<Product, Integer> list) {
 		int found = 0;
 		for (Map.Entry<Product, Integer> entry : list.entrySet()) {
@@ -85,5 +124,24 @@ public class OrderController {
 			list.put(productDAO.findById(id).get(), quantity);
 		}
 	}
+
+	public Product verifyStock( Map<Product, Integer> list) {
+		for (Map.Entry<Product, Integer> entry : list.entrySet()) {
+			if(productDAO.findById(entry.getKey().getId()).get().getQuantity() < entry.getValue())
+				return entry.getKey();
+		}
+		return null;
+	}
+
+	public void removeFromCart(Integer id, Map<Product, Integer> list) {
+		for (Map.Entry<Product, Integer> entry : list.entrySet()) {
+			if(entry.getKey().getId() == id) {
+				list.remove(entry.getKey());
+				break;
+			}
+		}
+	}
+
+
 
 }
