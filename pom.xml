@@ -14,7 +14,7 @@
     <packaging>war</packaging>
     <version>0.0.1-SNAPSHOT</version>
     <name>Shop</name>
-    <description>Gestion d'un annuaire de personnes</description>
+    <description>Gestion d'un eStore</description>
     <url>http://maven.apache.org</url>
     <properties>
         <java.version>11</java.version>
