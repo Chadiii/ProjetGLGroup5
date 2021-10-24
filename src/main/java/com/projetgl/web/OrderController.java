@@ -133,6 +133,15 @@ public class OrderController {
 		return null;
 	}
 
+	public void removeFromCart(Integer id, Map<Product, Integer> list) {
+		for (Map.Entry<Product, Integer> entry : list.entrySet()) {
+			if(entry.getKey().getId() == id) {
+				list.remove(entry.getKey());
+				break;
+			}
+		}
+	}
+
 
 
 }
