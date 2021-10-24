@@ -90,6 +90,34 @@ public class AdminController {
             return new ModelAndView("login");
         }
     }
+
+	@GetMapping("/admin/add")
+	public ModelAndView addProduct(HttpSession session) {
+		if(session.getAttribute("active") != null) {
+			return new ModelAndView("saveProduct");
+		}else {
+			return new ModelAndView("login");
+		}
+	}
+	@PostMapping("/saveProduct")
+	public ModelAndView saveProduct(HttpSession session, @RequestParam(required=false) Integer id, @RequestParam String name, @RequestParam int quantity, @RequestParam double price, @RequestParam String description) {
+		if(session.getAttribute("active") != null) {
+			if(id == null) {
+				productDAO.save(new Product(name, quantity, price, description));
+				return new ModelAndView("redirect:/admin");
+			}else {
+				Product product = productDAO.findById(id).get();
+				product.setName(name);
+				product.setQuantity(quantity);
+				product.setPrice(price);
+				product.setDescription(description);
+				productDAO.save(product);
+				return new ModelAndView("redirect:/admin");
+			}
+		}else {
+			return new ModelAndView("login");
+		}
+	}
 	
 	
 	@PreDestroy
