@@ -5,6 +5,7 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.servlet.http.HttpSession;
 
+import com.projetgl.model.Order;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +22,8 @@ import com.projetgl.dao.OrderRepository;
 import com.projetgl.dao.ProductRepository;
 import com.projetgl.model.Admin;
 import com.projetgl.model.Product;
+
+import java.util.List;
 
 @Controller
 public class AdminController {
@@ -128,7 +131,34 @@ public class AdminController {
 			return new ModelAndView("login");
 		}
 	}
-	
+
+	@GetMapping("/admin/order")
+	public ModelAndView order(HttpSession session) {
+		if(session.getAttribute("active") != null) {
+			List<Order> orders = orderDAO.findAll();
+			return new ModelAndView("orders", "orders", orders );
+		}else {
+			return new ModelAndView("login");
+		}
+	}
+
+	@GetMapping("/admin/order/delete/{id}")
+	public ModelAndView deleteOrder(HttpSession session, @PathVariable Integer id) {
+		if(session.getAttribute("active") != null) {
+			List<Product> productsInOrder = orderDAO.findById(id).get().getProducts();
+			incrementStock(productsInOrder);
+			orderDAO.deleteById(id);
+			return new ModelAndView("redirect:/admin/order");
+		}else {
+			return new ModelAndView("login");
+		}
+	}
+
+	public void incrementStock(List<Product> listProduct) {
+		for(Product product : listProduct) {
+			product.setQuantity(product.getQuantity() + 1);
+		}
+	}
 	
 	@PreDestroy
 	public void destroy() {
