@@ -99,6 +99,16 @@ public class AdminController {
 			return new ModelAndView("login");
 		}
 	}
+
+	@GetMapping("/admin/edit/{id}")
+	public ModelAndView editProduct(HttpSession session, @PathVariable Integer id) {
+		if(session.getAttribute("active") != null) {
+			return new ModelAndView("saveProduct", "product", productDAO.findById(id).get());
+		}else {
+			return new ModelAndView("login");
+		}
+	}
+
 	@PostMapping("/saveProduct")
 	public ModelAndView saveProduct(HttpSession session, @RequestParam(required=false) Integer id, @RequestParam String name, @RequestParam int quantity, @RequestParam double price, @RequestParam String description) {
 		if(session.getAttribute("active") != null) {
