@@ -40,6 +40,12 @@ public class OrderController {
 
 	@Autowired
 	ClientRepository clientDAO;
+	
+	@GetMapping("/")
+	public ModelAndView main() {
+		return new ModelAndView("redirect:/products");
+		
+	}
 
 	@GetMapping("/products")
 	public ModelAndView getadmin(@RequestParam(required = false) String name) {
@@ -111,6 +117,38 @@ public class OrderController {
 			return new ModelAndView("payment");
 		}
 	}
+	
+	@PostMapping("/order/save")
+	public ModelAndView saveOrder(HttpSession session, @RequestParam String name, @RequestParam String mail, 
+			@RequestParam String ccName, @RequestParam String ccNumber, @RequestParam String ccExpiration, @RequestParam String ccCCV) {
+		if(session.getAttribute("cart") == null) {
+			return new ModelAndView("redirect:/products");
+		}else {
+			Client client = new Client(name, mail, ccName, ccNumber, ccExpiration, ccCCV);
+			Map<Product, Integer> productCart = (Map<Product, Integer>) session.getAttribute("cart");
+			List<Product> products = new ArrayList<Product>();
+			MapToListWithDecrementProductStock(products, productCart);
+			
+			client = clientDAO.save(client);
+			orderDAO.save(new Order(new Date(), new Date(new Date().getTime() + (1000 * 60 * 60 * 48)), products, client));
+			
+			session.invalidate();
+			return new ModelAndView("redirect:/order");
+		}
+	}
+	
+	@GetMapping("/order")
+	public ModelAndView getOrder(HttpSession session, @RequestParam(required = false) String mail) {
+		if(mail == null) {
+			String mailInSession = (String)session.getAttribute("mailInSession");
+			if(mailInSession != null)
+				return new ModelAndView("corders", "orders", orderDAO.findByClientMail(mailInSession));
+			return new ModelAndView("corders");
+		}else {
+			session.setAttribute("mailInSession", mail);
+			return new ModelAndView("corders", "orders", orderDAO.findByClientMail(mail));
+		}
+	}
 
 	public void addToMap(Integer quantity, Integer id, Map<Product, Integer> list) {
 		int found = 0;
@@ -122,6 +160,16 @@ public class OrderController {
 		}
 		if(found == 0) {
 			list.put(productDAO.findById(id).get(), quantity);
+		}
+	}
+	
+	public void MapToListWithDecrementProductStock(List<Product> listProduct, Map<Product, Integer> list) {
+		for (Map.Entry<Product, Integer> entry : list.entrySet()) {
+			Product productToDecQuantity = entry.getKey();
+			productToDecQuantity.setQuantity(productToDecQuantity.getQuantity() - entry.getValue());
+			productDAO.save(productToDecQuantity);
+			for(int i = 0; i < entry.getValue(); i++)
+				listProduct.add(entry.getKey());
 		}
 	}
 
